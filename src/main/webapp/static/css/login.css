@@ -1,0 +1,113 @@
+﻿body {
+    margin: 0px;
+    padding: 0px;
+    font-family: Microsoft Yahei;
+    background-image: url(../images/bg.jpg);
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.container {
+
+}
+
+.login-container {
+    width: 33%; /*IE兼容*/
+    margin: 100px auto auto auto; /*IE兼容*/
+    padding: 15px;
+    border: solid thin rgba(255, 255, 255, 0.7);
+    background-color: rgba(51, 54, 71, 0.25);
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px #ffffff;
+}
+
+.login-container-left {
+    width: 48%;
+    float: left;
+    position: relative;
+}
+
+.left-content {
+}
+
+.left-content img {
+    display: block;
+    margin: auto;
+    width: 25%;
+}
+
+.web-title {
+    text-align: center;
+    height: 30px;
+    line-height: 30px;
+    font-size: 18px;
+    color: white;
+    margin-top: 5px;
+    font-family: "Microsoft Yahei";
+}
+
+input::-webkit-input-placeholder, textarea::-webkit-input-placeholder {
+    color: #ffffff;
+}
+
+input:-moz-placeholder, textarea:-moz-placeholder {
+    color: #ffffff;
+}
+
+.login-container-right {
+    width: 48%;
+    float: right;
+    padding-left: 5px;
+    border-left: solid thin rgba(255, 255, 255, 0.7);
+}
+
+ul {
+    width: 90%;
+    padding: 0px;
+    margin: 0px auto 0px auto;
+    list-style-type: none;
+}
+
+ul li {
+    margin-top: 25px;
+}
+
+.user-code-li, .user-pwd-li {
+    border-bottom: solid thin white;
+}
+
+#user-code, #user-pwd {
+    border: none;
+    padding-left: 40px;
+    font-family: "Microsoft Yahei";
+    font-size: 15px;
+    background: url(../images/user.png) no-repeat;
+    background-position: left;
+    height: 24px;
+    line-height: 24px;
+    outline: none;
+    color: white;
+}
+
+#user-pwd {
+    background: url(../images/pwd.png) no-repeat;
+    background-position: left;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-transition-delay: 9999s;
+    -webkit-transition: color 9999s ease-out, background-color 9999s ease-out;
+}
+
+#login, #register {
+    display: block;
+    width: 55%;
+    margin: 0px auto 0px auto;
+}
+
+.clear {
+    clear: both;
+}

@@ -1,0 +1,4 @@
+sku_stock-001 ==》 添加修改sku是出现原始库存大于销量与现有库存之和；
+user_order:add-001 ==》 添加订单时订单数据为null或订单数据长度为空
+user_order:add-002 ==》  添加订单时路径中的userId与所传参数中的userId不相等
+seckill_order:add-001 ==》 秒杀订单中秒杀商品ID为空

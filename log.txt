@@ -1,0 +1,16 @@
+2016-7-12:
+1、实体类Goods添加onSaleDate属性，为上架时间；(正式数据库已添加此字段)
+2、实体类Goods添加orderIndex属性，用于商品排序；（正式数据库已添加此字段)
+3、实体类ShoppingCart添加sku属性，用于购物车Sku；（正式数据库已添加此字段)
+2016-7-14:
+1、实体类Goods添加minPrice和maxPrice,表示此商品的最低价和最高价；（正式数据库已添加此字段）
+2016-7-15
+1、实体类OrderDetail添加skuId属性，用于订单详情对应的sku（正式数据库已添加此字段）
+1、实体类OrderDetail添加skuName属性，用于订单详情显示购买的订单套餐（正式数据库已添加此字段）
+2016-7-26
+1、t_sku数据表数据已经导入
+2、t_goods_attribute数据表已经建立
+3、t_sku_attribute数据表已经建立
+4、t_order_detail表中的sku_id数据已经导入
+5、t_goods的库存量已经更新
+6、t_shopping_cart表中的sku_id数据已经导入

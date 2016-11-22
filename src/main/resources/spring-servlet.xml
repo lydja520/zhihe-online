@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:component-scan base-package="cn.com.zhihetech.online.controller"/>
+
+    <mvc:annotation-driven>
+        <mvc:message-converters register-defaults="true">
+            <bean class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+                <property name="supportedMediaTypes" value="*/*;charset=UTF-8"/>
+                <!--禁用fastjson的循环引用问题-->
+                <property name="features">
+                    <array value-type="com.alibaba.fastjson.serializer.SerializerFeature">
+                        <bean id="DisableCircularReferenceDetect"
+                              class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
+                            <property name="staticField"
+                                      value="com.alibaba.fastjson.serializer.SerializerFeature.DisableCircularReferenceDetect"/>
+                        </bean>
+                    </array>
+                </property>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/views/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <!-- 上传文件拦截，设置最大上传文件大小   50M=50*1024*1024(B)=52428800 bytes -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="52428800"/>
+    </bean>
+
+    <!--静态资源配置-->
+    <mvc:default-servlet-handler/>
+
+    <!--拦截器配置-->
+    <mvc:interceptors>
+
+        <!--API V1拦截器-->
+        <mvc:interceptor>
+            <mvc:mapping path="/api/**"/>
+            <bean class="cn.com.zhihetech.online.interceptor.TokenInterceptor">
+                <property name="unCheckRequest">
+                    <list>
+                        <value>/api/securityCode/get</value>
+                        <value>/api/securityCode/verify</value>
+                        <value>/api/user/register</value>
+                        <value>/api/user/login</value>
+                        <value>/api/area/rootAreas</value>
+                        <value>/api/app/lastVersion</value>
+                        <value>/api/app/lastVersion</value>
+                        <value>/api/app/startImg</value>
+                        <value>/api/merchant/login</value>
+                        <value>/api/user/resetPwd</value>
+                    </list>
+                </property>
+            </bean>
+        </mvc:interceptor>
+
+        <!--API V2拦截器-->
+        <mvc:interceptor>
+            <mvc:mapping path="/api/v2/**"/>
+            <bean class="cn.com.zhihetech.online.interceptor.ApiV2TokenInterceptor">
+                <property name="unCheckRequest">
+                    <list>
+
+                    </list>
+                </property>
+            </bean>
+        </mvc:interceptor>
+
+        <mvc:interceptor>
+            <mvc:mapping path="/admin/api/**"/>
+            <bean class="cn.com.zhihetech.online.interceptor.ApiIntercepter"></bean>
+        </mvc:interceptor>
+
+        <mvc:interceptor>
+            <mvc:mapping path="/admin/**"/>
+            <bean class="cn.com.zhihetech.online.interceptor.LoginInterceptor">
+                <property name="unCheckRequest">
+                    <list>
+                        <value>/admin/login</value>
+                    </list>
+                </property>
+            </bean>
+        </mvc:interceptor>
+
+    </mvc:interceptors>
+</beans>

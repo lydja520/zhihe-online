@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <context:component-scan base-package="cn.com.zhihetech.online.* cn.com.zhihetech.online.v2.*">
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations" value="classpath:dataSource.properties"/>
+    </bean>
+    <!-- 数据源配置开始 -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="driverClassName" value="${jdbc.driverClassName}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.userName}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <property name="maxActive" value="200"/>
+        <property name="minIdle" value="5"/>
+        <property name="initialSize" value="30"/>
+        <property name="logAbandoned" value="true"/>
+        <property name="removeAbandoned" value="true"/>
+        <property name="removeAbandonedTimeout" value="10"/>
+        <property name="maxWait" value="30000"/>
+        <property name="timeBetweenEvictionRunsMillis" value="30000"/>
+        <property name="minEvictableIdleTimeMillis" value="60000"/>
+        <property name="connectionInitSqls" value="set names utf8mb4;"/>
+    </bean>
+    <!--数据源配置结束-->
+
+    <!-- Hibernate SessionFactory配置 开始-->
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="packagesToScan" value="cn.com.zhihetech.online.bean"/>
+        <property name="hibernateProperties">
+            <props>
+                <!-- 连接SqlServer数据库 -->
+                <prop key="hibernate.dialect">${hibernate.dialect}</prop>
+
+                <!--正式环境不需要此三行-->
+                <prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
+                <prop key="hibernate.format_sql">${hibernate.format_sql}</prop>
+                <prop key="hibernate.hbm2ddl.auto">${hibernate.hbm2ddl.auto}</prop>
+
+                <!--二级缓存配置-->
+                <prop key="hibernate.cache.use_second_level_cache">false</prop>
+                <prop key="hibernate.cache.use_query_cache">false</prop>
+                <prop key="hibernate.cache.region.factory_class">
+                    org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory
+                </prop>
+                <prop key="hibernate.cache.provider_configuration_file_resource_path">
+                    classpath:ehcache.xml
+                </prop>
+            </props>
+        </property>
+    </bean>
+    <!--Hibernate SessionFactory配置结束-->
+
+    <!--Hibernate事务管理Bean配置-->
+    <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+    <!--定义切面-->
+    <tx:advice id="transactionAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="*Always" propagation="REQUIRES_NEW"/>
+            <tx:method name="save*" propagation="REQUIRED"/>
+            <tx:method name="add*" propagation="REQUIRED"/>
+            <tx:method name="update*" propagation="REQUIRED"/>
+            <tx:method name="execute*" propagation="REQUIRED"/>
+            <tx:method name="delete*" propagation="REQUIRED"/>
+            <tx:method name="init*" propagation="REQUIRED"/>
+            <tx:method name="reset*" propagation="REQUIRED"/>
+            <tx:method name="get*" read-only="true"/>
+            <tx:method name="*" read-only="true"/>
+        </tx:attributes>
+    </tx:advice>
+    <aop:config>
+        <aop:pointcut id="transactionPointcut"
+                      expression="execution(* cn.com.zhihetech.online.service.*.*(..)) or execution(* cn.com.zhihetech.online.v2.service.*.*(..))"/>
+        <aop:advisor advice-ref="transactionAdvice" pointcut-ref="transactionPointcut"/>
+    </aop:config>
+
+    <!--quartz配置开始-->
+    <!--jobDetail-->
+    <bean id="pushBrithdateJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="cn.com.zhihetech.online.components.PushBrithdateSchedule"/>
+        <property name="durability" value="false"/>
+    </bean>
+    <bean id="merchantBillingJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="cn.com.zhihetech.online.components.MerchantBillingSchedule"/>
+        <property name="durability" value="false"/>
+    </bean>
+
+    <!--触发器配置开始-->
+    <bean id="pushBrithdateJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="pushBrithdateJob"/>
+        <property name="cronExpression" value="59 59 23 * * ?"/>
+    </bean>
+    <bean id="merchantBillingJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="merchantBillingJob"/>
+        <property name="cronExpression" value="0 0 0 ? * MON"/>
+    </bean>
+    <!--触发器配置结束-->
+
+    <!-- quartz调度工厂-->
+    <bean id="schedulerFactory" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="configLocation" value="classpath:quartz.properties"/>
+        <property name="dataSource" ref="dataSource"/>
+        <property name="applicationContextSchedulerContextKey" value="applicationContextKey"/>
+        <property name="startupDelay" value="5"/>
+        <property name="triggers">
+            <list>
+                <ref bean="pushBrithdateJobTrigger"/>
+                <ref bean="merchantBillingJobTrigger"/>
+            </list>
+        </property>
+        <property name="schedulerContextAsMap">
+            <map>
+                <entry key="activityService" value-ref="activityService"/>
+                <entry key="pushBrithdateService" value-ref="pushuBrithdateService"/>
+                <entry key="merchantBillService" value-ref="merchantBillService"/>
+                <entry key="orderScheduleService" value-ref="orderScheduleService"/>
+            </map>
+        </property>
+    </bean>
+    <!--quartz配置结束-->
+
+</beans>
